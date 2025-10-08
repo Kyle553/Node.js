@@ -1,0 +1,7 @@
+{
+  "name": "my-first-cli",
+  "version": "1.0.0",
+  "bin": {
+    "mycli": "./cli.js"
+  }
+}
