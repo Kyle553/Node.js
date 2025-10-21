@@ -1,51 +1,27 @@
 const http = require("http");
 const url = require("url");
-
-function handlePost(req, res) {
-  let body = "";
-
-  req.on("data", chunk => {
-    body += chunk.toString();
-  })
-
-  req.on("end", () => {
-    let data = {};
-
-    try {
-      data = JSON.parse(body);
-    } catch(err) {
-      console.error("ERROR:\n", err);
-    }
-
-    res.writeHead(200, {"Content-Type": "application/json"});
-    res.end(JSON.stringify({
-      message: "TEXT 123432",
-      number: 1234,
-      boolean: true,
-      received: data
-    }));
-  });
-}
-
-function handleGet(req, res) {
-  res.writeHead(200, {"Content-Type": "application/json"});
-  res.end(JSON.stringify({
-    id: 1,
-    info: "profile",
-    content: "sdfsdfsdf"
-  }));
-}
+const path = require("path");
+const fs = require("fs");
 
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
 
-  if(req.url === "/post" && req.method === "POST") {
-    handlePost(req, res);
-  } else if (parsedUrl.pathname === "/search" && req.method === "GET") {
-    handleGet(req, res);
+  if (parsedUrl.pathname === "/" && req.method === "GET") {
+    const filePath = path.join(__dirname, "pages", "home.html")
+    // const stream = fs.createReadStream(filePath);
+    
+    // stream.on("error", (err) => {
+    //   console.error("ERROR:\n", err);
+
+    //   res.writeHead(500, {"Content-Type": "text/plain"});
+    //   res.end("Server error");
+    // })
+
+    // res.writeHead(200, {"Content-Type": "text/html"});
+    // stream.pipe(res);
   }
 });
 
 server.listen(3000, () => {
-  console.log("server started");
-})
+  console.log("Server started")
+});
