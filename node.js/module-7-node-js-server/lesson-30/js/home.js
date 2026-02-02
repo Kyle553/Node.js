@@ -1,6 +1,21 @@
+const fs = require("fs");
+const path = require("path");
 const buttonGet = document.getElementById("GET");
 const list = document.getElementById("list");
-let itemsList = [];
+
+let itemsList = getDataFromFile();
+
+// Це повинен робити сервер
+// function getDataFromFile() {
+//   let data = null;
+//   try {
+//     data = fs.readFileSync(path.join(__dirname, "data.json"), "utf-8");
+//   } catch (err) {
+//     console.log("ERROR:\n", err);
+//   }
+  
+//   return data;
+// }
 
 async function get() {
   let data = {};
@@ -16,9 +31,12 @@ async function get() {
     console.error("CATCH ERROR:\n", err);
   }
 
-  itemsList.push(JSON.stringify(data, null, 1));
+  // Ми повинні забрати від сервера список з айді і неймами і передати в умовний itemsList
 
-  list.textContent = itemsList
+  
+  // itemsList.push(JSON.stringify(data, null, 1));
+
+  // list.textContent = itemsList
 
   console.log(data);
 }

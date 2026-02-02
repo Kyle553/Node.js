@@ -51,7 +51,7 @@ const server = http.createServer((req, res) => {
 
   } else if (parsedUrl.pathname === "/api/get" && req.method === "GET") {
     res.writeHead(200, {"Content-Type": "application/json"});
-    res.end(JSON.stringify({id1: 134532, id2: 2345345}));
+    res.end(JSON.stringify({id1: 134532, id2: 2345345})); // ????????????????????????????
   } else {
     res.writeHead(404, {"Content-Type": "text/plain; charset=utf-8"});
     res.end("Page not found");
