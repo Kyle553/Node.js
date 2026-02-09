@@ -7,57 +7,96 @@ const folders = {
   html: "pages",
   css: "styles"
 }
-const contentType = {
+
+const writeHeadContType = {
   js: {"Content-Type": "text/javascript"},
   html: {"Content-Type": "text/html"},
-  css: {"Content-Type": "text/css"}
+  css: {"Content-Type": "text/css"},
+  json: {"Content-Type": "application/json"},
+  text: {"Content-Type": "text/plain; charset=utf-8"}
 }
-let filePathValue = "";
 
-function readFile(filePath, res, contentType) {
+function readFile(filePath, res, contType) {
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      console.error("ERROR:\n", err);
+      console.error("Error read file:\n", err)
 
-      res.writeHead(500, {"Content-Type": "text/plain"});
-      res.end("Server error");
+      if(err.code === "ENOENT") {
+        res.statusCode = 404;
+      } else if(err.code === "EACCES") {
+        res.statusCode = 403;
+      } else {
+        res.statusCode = 500;
+      }
+      
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.end("Error read file");
       return;
     }
-
-    res.writeHead(200, contentType);
+    
+    res.writeHead(200, contType);
     res.end(data);
   })
 }
 
-function filePath(folder, fileName) {
-  return path.join(__dirname, folder, fileName);
+function readStream(filePath, res, headerName, headerValue) {
+  const stream = fs.createReadStream(filePath);
+  
+  stream.on("error", (err) => {
+    console.error("Error read steeam:\n", err);
+    
+    if(!res.headersSent) {
+      if(err.code === "ENOENT") {
+        res.statusCode = 404;
+      } else if(err.code === "EACCES") {
+        res.statusCode = 403;
+      } else {
+        res.statusCode = 500;
+      }
+      
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.end("Error read steeam");
+      return;
+    }
+    
+    res.destroy(err);
+  });
+  
+  res.setHeader(headerName, headerValue);
+  res.statusCode = 200;
+  stream.pipe(res);
+}
+
+function filePath(...parts) {
+  return path.join(__dirname, ...parts);
 }
 
 const server = http.createServer((req, res) => {
   const baseUrl = "http://localhost:3000"
   const parsedUrl = new URL(req.url, baseUrl);
+  const filePathValue = "";
 
   if (parsedUrl.pathname === "/" && req.method === "GET") {
     filePathValue = filePath(folders.html ,"home.html");
-    readFile(filePathValue, res, contentType.html);
+    readFile(filePathValue, res, writeHeadContType.html);
 
   } else if (parsedUrl.pathname === "/styles/home.css") {
     filePathValue = filePath(folders.css, "home.css");
-    readFile(filePathValue, res, contentType.css);
+    readFile(filePathValue, res, writeHeadContType.css);
 
   } else if (parsedUrl.pathname === "/js/home.js") {
     filePathValue = filePath(folders.js, "home.js");
-    readFile(filePathValue, res, contentType.js);
+    readFile(filePathValue, res, writeHeadContType.js);
 
   } else if (parsedUrl.pathname === "/api/get" && req.method === "GET") {
-    res.writeHead(200, {"Content-Type": "application/json"});
-    res.end(JSON.stringify({id1: 134532, id2: 2345345})); // ????????????????????????????
+    filePathValue = filePath("data.json");
+    readStream(filePathValue, res, "Content-Type", "application/json");
   } else {
-    res.writeHead(404, {"Content-Type": "text/plain; charset=utf-8"});
+    res.writeHead(404, writeHeadContType.text);
     res.end("Page not found");
   }
 });
 
 server.listen(3000, () => {
-  console.log("Server started")
+  console.log("Server started");
 }); 
